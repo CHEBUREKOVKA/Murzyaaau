@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Мурз.банк</title>
+    
+    <!-- ИСПОЛЬЗУЕМ ЗЕРКАЛО JSDELIVR (ОБЫЧНО ПРОХОДИТ ВЕЗДЕ) -->
+    <script src="https://cdn.jsdelivr.net"></script>
+    <script src="https://cdn.jsdelivr.net"></script>
+
+    <style>
+        :root { --primary: #ffcc00; --bg: #f4f4f4; }
+        body { margin: 0; font-family: sans-serif; background: var(--bg); color: #333; }
+        .hidden { display: none !important; }
+        #log-bar { position: fixed; top: 0; width: 100%; background: #000; color: #0f0; font-size: 10px; z-index: 9999; padding: 5px; }
+        #auth-screen { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; text-align: center; }
+        .inp { width: 80%; padding: 15px; margin: 10px 0; border: 1px solid #ddd; border-radius: 12px; font-size: 16px; outline: none; }
+        .btn { width: 80%; padding: 15px; background: var(--primary); border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        .header { background: linear-gradient(135deg, #ffcc00 0%, #d4aa00 100%); padding: 30px 20px; color: #fff; border-radius: 0 0 25px 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .balance { font-size: 32px; font-weight: bold; margin-top: 10px; }
+        .card { background: #fff; margin: 15px; padding: 20px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+
+    <div id="log-bar">Проверка связи...</div>
+
+    <div id="auth-screen">
+        <h1 style="color: var(--primary); font-size: 36px; margin-bottom: 5px;">Мурз.банк</h1>
+        <p style="font-size: 12px; color: #aaa; margin-bottom: 20px;">Твой надежный кошачий банк</p>
+        <input type="text" id="l-nick" class="inp" placeholder="Никнейм">
+        <input type="password" id="l-pass" class="inp" placeholder="Пароль">
+        <button id="l-btn" class="btn">Войти или Создать</button>
+        <p style="font-size: 10px; color: #ccc; margin-top: 30px;">по вопросам тг @crutoicheliky</p>
+    </div>
+
+    <div id="app-ui" class="hidden">
+        <div class="header">
+            <div id="u-nick" style="font-weight: bold; font-size: 18px;">Загрузка...</div>
+            <div class="balance"><span id="u-bal">0</span> мурз</div>
+        </div>
+        <div class="card">
+            <h3 style="margin-top:0">Перевод</h3>
+            <input type="text" id="t-nick" class="inp" style="width:100%" placeholder="Ник получателя">
+            <input type="number" id="t-sum" class="inp" style="width:100%" placeholder="Сумма (1-1000)">
+            <button id="t-btn" class="btn" style="width:100%">Отправить мурзы</button>
+        </div>
+    </div>
+
+    <script>
+        const info = (t) => document.getElementById('log-bar').innerText = t;
+
+        // Ждем 1.5 секунды загрузки библиотек
+        setTimeout(() => {
+            if (typeof firebase === 'undefined') {
+                info("ОШИБКА: Доступ к Firebase заблокирован. Используй мобильный интернет!");
+            } else {
+                init();
+            }
+        }, 1500);
+
+        function init() {
+            const config = {
+                apiKey: "AIzaSyBKmVYQkiMWvTt2NZVwWiGmDVHeV6QGXrw",
+                authDomain: "merzbankes.firebaseapp.com",
+                projectId: "merzbankes",
+                storageBucket: "merzbankes.firebasestorage.app",
+                messagingSenderId: "187194168466",
+                appId: "1:187194168466:web:fec1340c2f3800cc1b824b"
+            };
+
+            firebase.initializeApp(config);
+            const db = firebase.firestore();
+            info("СВЯЗЬ УСТАНОВЛЕНА ✅");
+
+            let me = null;
+
+            document.getElementById('l-btn').onclick = () => {
+                const nick = document.getElementById('l-nick').value.toLowerCase().trim();
+                const pass = document.getElementById('l-pass').value;
+
+                if (!nick || !pass) return alert("Заполни поля!");
+
+                db.collection("users").doc(nick).get().then(doc => {
+                    if (doc.exists) {
+                        if (doc.data().password === pass) {
+                            if (doc.data().isBanned) return alert("АККАУНТ ЗАБАНЕН");
+                            enter(doc.data());
+                        } else alert("Неверный пароль!");
+                    } else {
+                        const u = { nick, password: pass, balance: 0, role: 'standard', isBanned: false };
+                        db.collection("users").doc(nick).set(u).then(() => enter(u));
+                    }
+                }).catch(e => info("Ошибка БД: " + e.message));
+            };
+
+            function enter(data) {
+                me = data;
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('app-ui').classList.remove('hidden');
+                document.getElementById('u-nick').innerText = "Привет, " + data.nick;
+                
+                db.collection("users").doc(data.nick).onSnapshot(d => {
+                    if (d.exists) {
+                        me = d.data();
+                        document.getElementById('u-bal').innerText = me.balance;
+                        info("Обновлено: " + new Date().toLocaleTimeString());
+                    }
+                });
+            }
+
+            document.getElementById('t-btn').onclick = () => {
+                const to = document.getElementById('t-nick').value.toLowerCase().trim();
+                const val = Number(document.getElementById('t-sum').value);
+
+                if (to === me.nick || val < 1 || val > 1000 || me.balance < val) return alert("Ошибка! Проверь сумму или ник.");
+
+                db.collection("users").doc(to).get().then(res => {
+                    if (!res.exists) return alert("Такого пользователя нет!");
+                    
+                    db.collection("users").doc(me.nick).update({ balance: me.balance - val });
+                    db.collection("users").doc(to).update({ balance: res.data().balance + val });
+                    alert("Мурзы отправлены!");
+                });
+            };
+        }
+    </script>
+</body>
+</html>
+
