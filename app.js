@@ -1,17 +1,40 @@
-import { initializeApp } from "https://esm.sh";
+// Используем супер-совместимые ссылки для мобилок
+import { initializeApp } from "https://www.gstatic.com";
 import { 
     getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where, getDocs, deleteDoc, onSnapshot 
-} from "https://esm.sh";
+} from "https://www.gstatic.com";
 
-// === КОНФИГУРАЦИЯ FIREBASE (ВСТАВЬ СВОЁ) ===
+// ТВОЙ КОНФИГ (Проверь каждую букву!)
 const firebaseConfig = {
-    apiKey: "AIzaSyBKmVYQkiMWVtT2NZVwWiGmDVHeV6QGxRw",
+  apiKey: "AIzaSyBKmVYQkiMWVtT2NZVwWiGmDVHeV6QGxRw",
     authDomain: "merzbankes.firebaseapp.com",
     projectId: "merzbankes",
     storageBucket: "merzbankes.firebasestorage.app",
     messagingSenderId: "187194168466",
     appId: "1:187194168466:web:fec1340c2f3800cc1b824b"
 };
+
+// Инициализация с проверкой
+let db;
+try {
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    console.log("Firebase подключен!");
+} catch (e) {
+    alert("Критическая ошибка инициализации: " + e.message);
+}
+
+// Глобальная функция для алертов (чтобы работала везде)
+function myAlert(text) {
+    const msg = document.getElementById('modal-msg');
+    if(msg) {
+        msg.innerText = text;
+        document.getElementById('modal-container').classList.remove('hidden');
+    } else {
+        alert(text); // Если модалка еще не прогрузилась
+    }
+}
+
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
