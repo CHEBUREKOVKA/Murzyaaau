@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Мурз.банк</title>
+    
+    <!-- ПОПЫТКА №4: UNPKG (Иногда помогает обойти блокировки) -->
+    <script src="https://unpkg.com"></script>
+    <script src="https://unpkg.com"></script>
+
+    <style>
+        :root { --primary: #ffcc00; --bg: #f4f4f4; }
+        body { margin: 0; font-family: sans-serif; background: var(--bg); padding-bottom: 70px; }
+        .hidden { display: none !important; }
+        #debug-log { position: fixed; top: 0; width: 100%; background: #000; color: #0f0; font-size: 10px; z-index: 9999; padding: 5px; }
+        #auth-screen { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; }
+        input { width: 85%; padding: 15px; margin: 10px 0; border: 1px solid #ddd; border-radius: 12px; font-size: 16px; }
+        button { width: 85%; padding: 15px; background: var(--primary); border: none; border-radius: 12px; font-weight: bold; }
+        .header { background: linear-gradient(135deg, #ffcc00 0%, #d4aa00 100%); padding: 30px 20px; color: #fff; border-radius: 0 0 25px 25px; }
+        .balance { font-size: 36px; font-weight: bold; margin-top: 10px; }
+        .card { background: #fff; margin: 15px; padding: 20px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+
+    <div id="debug-log">Инициализация...</div>
+
+    <div id="auth-screen">
+        <h1 style="color: var(--primary)">Мурз.банк</h1>
+        <input type="text" id="login-nick" placeholder="Никнейм">
+        <input type="password" id="login-pass" placeholder="Пароль">
+        <button id="btn-login">Войти / Создать</button>
+    </div>
+
+    <div id="app-interface" class="hidden">
+        <div class="header">
+            <div id="display-nick" style="font-weight:bold;">User</div>
+            <div class="balance"><span id="balance-num">0</span> мурз</div>
+        </div>
+        <div class="card">
+            <h3>Перевод</h3>
+            <input type="text" id="send-to" placeholder="Ник" style="width:100%">
+            <input type="number" id="send-amount" placeholder="Сумма" style="width:100%">
+            <button id="btn-send" style="width:100%">Отправить</button>
+        </div>
+    </div>
+
+    <script>
+        const log = (t) => document.getElementById('debug-log').innerText = t;
+        
+        // Попытка запустить Firebase принудительно через 2 секунды
+        setTimeout(() => {
+            if (typeof firebase === 'undefined') {
+                log("ОШИБКА: Провайдер блокирует Firebase. Попробуй VPN или мобильный интернет.");
+            } else {
+                startFirebase();
+            }
+        }, 2000);
+
+        function startFirebase() {
+            const config = {
+                apiKey: "AIzaSyBKmVYQkiMWvTt2NZVwWiGmDVHeV6QGXrw",
+                authDomain: "merzbankes.firebaseapp.com",
+                projectId: "merzbankes",
+                storageBucket: "merzbankes.firebasestorage.app",
+                messagingSenderId: "187194168466",
+                appId: "1:187194168466:web:fec1340c2f3800cc1b824b"
+            };
+            firebase.initializeApp(config);
+            const db = firebase.firestore();
+            log("ГОТОВО ✅");
+
+            document.getElementById('btn-login').onclick = () => {
+                const nick = document.getElementById('login-nick').value.toLowerCase().trim();
+                const pass = document.getElementById('login-pass').value;
+                if(!nick || !pass) return alert("Заполни всё");
+
+                db.collection("users").doc(nick).get().then(doc => {
+                    if(doc.exists) {
+                        if(doc.data().password === pass) enter(doc.data());
+                        else alert("Неверный пароль");
+                    } else {
+                        const u = {nick, password: pass, balance: 0, role: 'standard'};
+                        db.collection("users").doc(nick).set(u).then(() => enter(u));
+                    }
+                }).catch(e => log("Ошибка БД: " + e.message));
+            };
+
+            function enter(data) {
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('app-interface').classList.remove('hidden');
+                document.getElementById('display-nick').innerText = data.nick;
+                
+                db.collection("users").doc(data.nick).onSnapshot(d => {
+                    if(d.exists) document.getElementById('balance-num').innerText = d.data().balance;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
+
