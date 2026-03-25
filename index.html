@@ -5,154 +5,185 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Мурз.банк</title>
     <style>
-        :root {
-            --primary: #ffcc00; /* Начальная желтая гамма */
-            --bg: #f4f4f4;
-            --card: #ffffff;
-            --text: #000000;
-        }
-
-        body { margin: 0; font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); transition: 0.3s; padding-bottom: 70px; }
+        :root { --primary: #ffcc00; --bg: #f4f4f4; --card: #ffffff; --text: #000; }
+        body { margin: 0; font-family: sans-serif; background: var(--bg); color: var(--text); padding-bottom: 70px; }
         .hidden { display: none !important; }
         
-        /* Экран входа */
-        #auth-screen { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: white; text-align: center; }
-        .auth-form { width: 80%; max-width: 300px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 12px; background: var(--primary); border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .support-text { font-size: 12px; color: #888; margin-top: 20px; }
-
-        /* Шапка Сбер-стайл */
-        .header { background: linear-gradient(135deg, var(--primary) 0%, #d4aa00 100%); padding: 30px 20px; color: white; border-radius: 0 0 25px 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        /* Авторизация */
+        #auth-screen { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; }
+        .auth-card { width: 85%; max-width: 350px; text-align: center; }
+        input { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 15px; background: var(--primary); border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        
+        /* Сбер-Интерфейс */
+        .header { background: linear-gradient(135deg, #ffcc00 0%, #d4aa00 100%); padding: 30px 20px; color: #fff; border-radius: 0 0 25px 25px; }
         .user-row { display: flex; align-items: center; gap: 15px; }
-        
-        /* Аватарка и рамки */
-        .avatar-box { width: 60px; height: 60px; border-radius: 50%; overflow: hidden; background: #eee; border: 3px solid transparent; position: relative; }
+        .avatar-box { width: 60px; height: 60px; border-radius: 50%; background: #eee; border: 3px solid #fff; overflow: hidden; position: relative; }
         .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
-        .role-good { border-color: #21a038; }
-        .role-pro { border-color: #007aff; }
-        .role-cyborg { border-color: #808080; }
-        .role-murz { border-color: #ffcc00; }
-        .cyborg-gun { position: absolute; bottom: 0; right: 0; font-size: 14px; }
-
-        .balance-box { margin-top: 20px; }
-        #balance-num { font-size: 36px; font-weight: bold; }
-        #balance-num.minus { color: #ff4d4d !important; }
-
-        /* Вкладки */
-        .tab-page { padding: 20px; }
-        .card { background: var(--card); padding: 15px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px; }
         
-        /* Нижнее меню */
-        .nav { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; }
-        .nav-item { background: none; border: none; font-size: 11px; color: #888; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
-        .nav-item.active { color: var(--primary); }
+        /* Ранги (Рамки) */
+        .role-good { border-color: #21a038 !important; }
+        .role-pro { border-color: #007aff !important; }
+        .role-cyborg { border-color: #808080 !important; }
+        .role-murz { border-color: #ffcc00 !important; }
 
-        /* Модальные окна */
-        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index: 100; }
-        .modal { background:white; padding:20px; border-radius:20px; width:80%; max-width:300px; text-align:center; }
+        #balance-num { font-size: 36px; font-weight: bold; margin-top: 15px; }
+        #balance-num.minus { color: #ff4d4d; }
+
+        .card { background: #fff; margin: 15px; padding: 20px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         
-        /* Тема Киборг */
-        body.cyborg-mode { border: 2px solid red; }
+        /* Навигация */
+        .nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #eee; }
+        .nav-btn { background: none; border: none; font-size: 12px; color: #888; text-align: center; }
+        .nav-btn.active { color: var(--primary); }
+
+        /* Модалка */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal { background: #fff; padding: 25px; border-radius: 25px; width: 80%; text-align: center; }
         
-        /* История */
-        .hist-item { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 10px 0; }
+        .support { font-size: 12px; color: #aaa; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <!-- ЭКРАН ВХОДА -->
     <div id="auth-screen">
-        <div class="auth-form">
-            <h1 style="color: #ffcc00;">Мурз.банк</h1>
+        <div class="auth-card">
+            <h1 style="color: var(--primary)">Мурз.банк</h1>
             <input type="text" id="login-nick" placeholder="Никнейм">
             <input type="password" id="login-pass" placeholder="Пароль">
             <button id="btn-login">Войти / Создать</button>
-            <p class="support-text">по вопросам тг @crutoicheliky</p>
+            <p class="support">по вопросам тг @crutoicheliky</p>
         </div>
     </div>
 
-    <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
+    <!-- ГЛАВНЫЙ ИНТЕРФЕЙС -->
     <div id="app-interface" class="hidden">
-        <header class="header" id="app-header">
+        <div class="header">
             <div class="user-row">
                 <div class="avatar-box" id="ava-frame">
                     <img id="my-ava" src="https://via.placeholder.com">
-                    <span id="gun-icon" class="hidden">🔫</span>
                 </div>
                 <div>
-                    <div id="my-nick-display" style="font-weight:bold; font-size:18px;">Nick</div>
-                    <div id="my-role-display" style="font-size:12px; opacity:0.8;">Клиент</div>
+                    <div id="display-nick" style="font-weight: bold; font-size: 20px;">Nick</div>
+                    <div id="display-role" style="font-size: 13px; opacity: 0.8;">Клиент</div>
                 </div>
             </div>
-            <div class="balance-box">
-                <div id="balance-num">0</div>
-                <div style="font-size:14px; opacity:0.9;">мурзов</div>
-            </div>
-        </header>
+            <div id="balance-num">0</div>
+            <div style="font-size: 14px; opacity: 0.8;">мурзов</div>
+        </div>
 
-        <!-- Главная -->
-        <div id="tab-main" class="tab-page">
+        <div id="tab-main" class="tab-content">
             <div class="card">
-                <h3>Перевести</h3>
-                <input type="text" id="target-nick" placeholder="Ник получателя">
-                <input type="number" id="transfer-amount" placeholder="Сумма">
+                <h3>Перевести мурзы</h3>
+                <input type="text" id="send-to" placeholder="Кому (ник)">
+                <input type="number" id="send-amount" placeholder="Сумма">
                 <button id="btn-send">Отправить</button>
             </div>
         </div>
 
-        <!-- История -->
-        <div id="tab-history" class="tab-page hidden">
-            <div class="card">
-                <h3>История (3 дня)</h3>
-                <div id="history-list"></div>
-            </div>
-        </div>
-
-        <!-- Настройки -->
-        <div id="tab-settings" class="tab-page hidden">
-            <div class="card">
-                <h3>Аватарка</h3>
-                <input type="file" id="ava-upload" accept="image/*">
-            </div>
-            <div class="card">
-                <h3>Гамма</h3>
-                <select id="theme-select">
-                    <option value="yellow">Желтая (Стандарт)</option>
-                    <option value="green">Зеленая</option>
-                    <option value="red">Красная</option>
-                    <option value="grey">Серая</option>
-                    <option value="black">Черная</option>
-                    <option value="white">Белая</option>
-                </select>
-            </div>
-            <button id="btn-logout" style="background:#ff4d4d; color:white;">Выйти</button>
-        </div>
-
-        <!-- Админка -->
-        <div id="tab-admin" class="tab-page hidden">
-            <div class="card">
-                <h3>Управление пользователями</h3>
-                <div id="admin-user-list"></div>
-            </div>
-        </div>
-
         <nav class="nav">
-            <button class="nav-item active" onclick="showTab('main')">🏠<br>Главная</button>
-            <button class="nav-item" onclick="showTab('history')">📜<br>История</button>
-            <button class="nav-item" onclick="showTab('settings')">⚙️<br>Настройки</button>
-            <button id="nav-admin" class="nav-item hidden" onclick="showTab('admin')">🛡️<br>Админ</button>
+            <button class="nav-btn active" onclick="alert('Вы на главной')">🏠<br>Главная</button>
+            <button class="nav-btn" onclick="alert('История в разработке')">📜<br>История</button>
+            <button class="nav-btn" onclick="document.getElementById('ava-input').click()">👤<br>Аватар</button>
+            <input type="file" id="ava-input" class="hidden" accept="image/*">
         </nav>
     </div>
 
-    <!-- Модалка -->
+    <!-- Модальное окно -->
     <div id="modal-container" class="modal-overlay hidden">
         <div class="modal">
             <p id="modal-msg"></p>
-            <button onclick="closeModal()">Понятно</button>
+            <button onclick="document.getElementById('modal-container').classList.add('hidden')">ОК</button>
         </div>
     </div>
 
-    <script type="module" src="app.js"></script>
+    <!-- ЛОГИКА (FIREBASE) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com";
+
+        // ТВОЙ КОНФИГ
+        const firebaseConfig = {
+            apiKey: "AIzaSyBKmVYQkiMWvTt2NZVwWiGmDVHeV6QGXrw",
+            authDomain: "merzbankes.firebaseapp.com",
+            projectId: "merzbankes",
+            storageBucket: "merzbankes.firebasestorage.app",
+            messagingSenderId: "187194168466",
+            appId: "1:187194168466:web:fec1340c2f3800cc1b824b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        let currentUser = null;
+
+        function myAlert(text) {
+            document.getElementById('modal-msg').innerText = text;
+            document.getElementById('modal-container').classList.remove('hidden');
+        }
+
+        // ВХОД
+        document.getElementById('btn-login').onclick = async () => {
+            const nick = document.getElementById('login-nick').value.toLowerCase().trim();
+            const pass = document.getElementById('login-pass').value;
+
+            if (!nick || !pass) return myAlert("Заполни всё!");
+
+            try {
+                const userRef = doc(db, "users", nick);
+                const snap = await getDoc(userRef);
+
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (data.isBanned) return myAlert("БАН!");
+                    if (data.password !== pass) return myAlert("Неверный пароль!");
+                    startApp(data);
+                } else {
+                    const newUser = { nick, password: pass, balance: 0, role: 'standard', isBanned: false, theme: 'yellow' };
+                    await setDoc(userRef, newUser);
+                    startApp(newUser);
+                }
+            } catch (e) {
+                myAlert("Ошибка: " + e.message);
+            }
+        };
+
+        function startApp(data) {
+            currentUser = data;
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-interface').classList.remove('hidden');
+            
+            // Грузим аву
+            const savedAva = localStorage.getItem('murz_ava_' + data.nick);
+            if (savedAva) document.getElementById('my-ava').src = savedAva;
+
+            // Следим за базой в реальном времени
+            onSnapshot(doc(db, "users", data.nick), (docSnap) => {
+                if (docSnap.exists()) {
+                    currentUser = docSnap.data();
+                    updateUI();
+                }
+            });
+        }
+
+        function updateUI() {
+            const b = document.getElementById('balance-num');
+            b.innerText = currentUser.balance;
+            b.classList.toggle('minus', currentUser.balance < 0);
+            document.getElementById('display-nick').innerText = currentUser.nick;
+            document.getElementById('display-role').innerText = "Ранг: " + currentUser.role;
+            document.getElementById('ava-frame').className = "avatar-box role-" + currentUser.role;
+        }
+
+        // ЗАГРУЗКА АВАТАРКИ
+        document.getElementById('ava-input').onchange = (e) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                localStorage.setItem('murz_ava_' + currentUser.nick, reader.result);
+                document.getElementById('my-ava').src = reader.result;
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        };
+    </script>
 </body>
 </html>
