@@ -1,8 +1,13 @@
-// 1. ИМПОРТЫ (Полные ссылки, чтобы телефон их увидел)
+// ПРОВЕРКА ЗАПУСКА
+alert("Мурз.банк: Скрипт запущен!");
+
+window.onerror = function(msg, url, line) {
+    alert("КРИТИЧЕСКАЯ ОШИБКА: " + msg + "\nСтрока: " + line);
+};
+
 import { initializeApp } from "https://www.gstatic.com";
 import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com";
 
-// 2. ТВОЙ КОНФИГ (Уже заполнен по твоему скрину)
 const firebaseConfig = {
     apiKey: "AIzaSyBKmVYQkiMWvTt2NZVwWiGmDVHeV6QGXrw",
     authDomain: "merzbankes.firebaseapp.com",
@@ -12,37 +17,26 @@ const firebaseConfig = {
     appId: "1:187194168466:web:fec1340c2f3800cc1b824b"
 };
 
-// 3. ИНИЦИАЛИЗАЦИЯ
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
 let currentUser = null;
 
-// Функция для уведомлений внутри интерфейса
+// Показ окон на экране
 function myAlert(text) {
     const modal = document.getElementById('modal-container');
     const msg = document.getElementById('modal-msg');
     if (modal && msg) {
         msg.innerText = text;
         modal.classList.remove('hidden');
-    } else {
-        alert(text);
-    }
+    } else { alert(text); }
 }
 
-// Привязка кнопки входа
-document.addEventListener('DOMContentLoaded', () => {
-    const loginBtn = document.getElementById('btn-login');
-    if (loginBtn) {
-        loginBtn.onclick = handleAuth;
-    }
-});
-
+// ЛОГИКА ВХОДА
 async function handleAuth() {
     const nick = document.getElementById('login-nick').value.toLowerCase().trim();
     const pass = document.getElementById('login-pass').value;
 
-    if (!nick || !pass) return myAlert("Заполни все поля!");
+    if (!nick || !pass) return myAlert("Введи ник и пароль!");
 
     try {
         const userRef = doc(db, "users", nick);
@@ -55,38 +49,32 @@ async function handleAuth() {
             login(data);
         } else {
             const newUser = {
-                nick: nick,
-                password: pass,
-                balance: 0,
-                role: 'standard',
-                isBanned: false,
-                customLimit: 1000,
-                theme: 'yellow'
+                nick: nick, password: pass, balance: 0, role: 'standard',
+                isBanned: false, customLimit: 1000, theme: 'yellow'
             };
             await setDoc(userRef, newUser);
             login(newUser);
         }
     } catch (e) {
-        myAlert("Ошибка: " + e.message);
+        myAlert("Ошибка Firebase: " + e.message);
     }
 }
 
 function login(userData) {
     currentUser = userData;
     localStorage.setItem('murz_login', JSON.stringify({n: userData.nick, p: userData.password}));
-    
     document.getElementById('auth-screen').classList.add('hidden');
     document.getElementById('app-interface').classList.remove('hidden');
     
+    // Подгрузка авы из памяти телефона
     const savedAva = localStorage.getItem('murz_ava_' + userData.nick);
     if (savedAva) document.getElementById('my-ava').src = savedAva;
 
     initRealtime();
-    if(userData.role === 'admin') {
-        document.getElementById('nav-admin').classList.remove('hidden');
-    }
+    if(userData.role === 'admin') document.getElementById('nav-admin').classList.remove('hidden');
 }
 
+// ПОДПИСКА НА ОБНОВЛЕНИЯ (Чтобы баланс менялся сам)
 function initRealtime() {
     onSnapshot(doc(db, "users", currentUser.nick), (docSnap) => {
         if (docSnap.exists()) {
@@ -103,9 +91,15 @@ function renderUI() {
     
     document.getElementById('my-nick-display').innerText = currentUser.nick;
     document.getElementById('my-role-display').innerText = `Ранг: ${currentUser.role}`;
-    
     document.getElementById('ava-frame').className = 'avatar-box role-' + currentUser.role;
     document.body.className = 'theme-' + currentUser.theme;
 }
 
+// Ивенты кнопок
+document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('btn-login');
+    if(btn) btn.onclick = handleAuth;
+});
+
 window.closeModal = () => document.getElementById('modal-container').classList.add('hidden');
+
