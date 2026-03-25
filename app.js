@@ -1,5 +1,7 @@
-import { initializeApp } from "https://www.gstatic.com";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com";
+import { initializeApp } from "https://esm.sh";
+import { 
+    getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where, getDocs, deleteDoc, onSnapshot 
+} from "https://esm.sh";
 
 // === КОНФИГУРАЦИЯ FIREBASE (ВСТАВЬ СВОЁ) ===
 const firebaseConfig = {
